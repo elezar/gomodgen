@@ -25,6 +25,13 @@ func TestTypeNameReplacement(t *testing.T) {
 	}
 }
 
+func TestBasenameReplacement(t *testing.T) {
+	this := Impl{Body: "{{basename}}", Basename: "foo"}
+
+	assert.Equal(t, "foo", this.String(), "")
+
+}
+
 func TestNameReplacement(t *testing.T) {
 	cases := []struct {
 		d    int
