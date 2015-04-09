@@ -19,16 +19,16 @@ func TestTypeNameReplacement(t *testing.T) {
 		{"preamble{{type}}", "preambleinteger"},
 	}
 	for _, c := range cases {
-		this := Impl{Body: c.def, Type: "integer"}
+		this := Impl{BodyTemplate: c.def}
 
-		assert.Equal(t, c.want, this.String(), "")
+		assert.Equal(t, c.want, this.Definition("integer", 0), "")
 	}
 }
 
 func TestBasenameReplacement(t *testing.T) {
-	this := Impl{Body: "{{basename}}", Basename: "foo"}
+	this := Impl{BodyTemplate: "{{basename}}", Basename: "foo"}
 
-	assert.Equal(t, "foo", this.String(), "")
+	assert.Equal(t, "foo", this.Definition("", 0), "")
 
 }
 
@@ -43,9 +43,9 @@ func TestNameReplacement(t *testing.T) {
 		{99, "foo_integer_99d"},
 	}
 	for _, c := range cases {
-		this := Impl{Basename: "foo", Body: "{{name}}", Type: "integer", Dim: c.d}
+		this := Impl{Basename: "foo", BodyTemplate: "{{name}}"}
 
-		assert.Equal(t, c.want, this.String(), "")
+		assert.Equal(t, c.want, this.Definition("integer", c.d), "")
 	}
 }
 
@@ -61,17 +61,11 @@ func TestExpandedName(t *testing.T) {
 		{99, "foo_integer_99d"},
 	}
 	for _, c := range cases {
-		this := Impl{Basename: "foo", Type: "integer", Dim: c.d}
+		this := Impl{Basename: "foo"}
 
-		assert.Equal(t, c.want, this.GetName(), "")
+		assert.Equal(t, c.want, this.Name("integer", c.d), "")
 	}
 
-}
-
-func TestExpandedName1D(t *testing.T) {
-	this := Impl{Basename: "foo", Type: "integer", Dim: 1}
-
-	assert.Equal(t, "foo_integer_1d", this.GetName(), "")
 }
 
 func TestDimensionString(t *testing.T) {
@@ -86,9 +80,7 @@ func TestDimensionString(t *testing.T) {
 		{99, "99d"},
 	}
 	for _, c := range cases {
-		this := Impl{Dim: c.d}
-
-		assert.Equal(t, c.want, this.nd(), "")
+		assert.Equal(t, c.want, nd(c.d), "")
 	}
 
 }
@@ -105,9 +97,9 @@ func TestNString(t *testing.T) {
 		{99, "99"},
 	}
 	for _, c := range cases {
-		this := Impl{Body: "{{n}}", Dim: c.d}
+		this := Impl{BodyTemplate: "{{n}}"}
 
-		assert.Equal(t, c.want, this.String(), "")
+		assert.Equal(t, c.want, this.Definition("", c.d), "")
 	}
 
 }

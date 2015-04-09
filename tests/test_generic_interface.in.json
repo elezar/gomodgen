@@ -1,0 +1,6 @@
+{
+  "Name":"foo",
+  "BodyFile":"test_subroutine_body.in.f90",
+  "Types":["integer"],
+  "Dimensions":[0]
+}
