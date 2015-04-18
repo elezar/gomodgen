@@ -19,17 +19,22 @@ function to_string_integer(i) result(s)
   implicit none
   integer, value :: i
   character(len=:), allocatable :: s
-  
+
   integer :: required_len
-  
+
   required_len = get_required_len(i)
-  
+
   allocate(s(len=required_len))
-  
+
   write (s, '(I0)') i
-  
+
   return
 end function to_string_integer
 ```
 
 I also want to learn some Go.
+
+
+# Copyright
+
+Copyright (c) 2015 Evan Lezar (http://www.evanlezar.com)
