@@ -45,7 +45,7 @@ func New(basename string, bodyTemplate string, typename string, dim int) *Impl {
 }
 
 // Create a new implementation, loading the body from a file.
-func NewImplFromFile(Basename string, typename string, dim int, filename string) *Impl {
+func NewFromFile(Basename string, typename string, dim int, filename string) *Impl {
 	i := New(Basename, "", typename, dim)
 
 	i.LoadBody(filename)
@@ -66,6 +66,10 @@ func (i *Impl) LoadBody(filename string) error {
 	i.BodyTemplate = string(dataIn)
 
 	return nil
+}
+
+func (i Impl) Declaration() string {
+	return "module procedure " + i.Name()
 }
 
 // Definition produces the string representation of the implemention, making the required

@@ -6,88 +6,103 @@ import (
 	"io/ioutil"
 	"path"
 	"path/filepath"
+	"strings"
 
 	"github.com/elezar/gomodgen/impl"
+	"github.com/elezar/gomodgen/interfaces"
 )
 
-// Generator allows for the generation of the Name and Body of a specific implemenation
-// of the generic interface
-type Generator interface {
-	Name(basename, typename string, dim int) string
-	Body(basename, typename string, dim int) string
-}
-
-// Generic represents a Fortran generic interface.
-type Generic struct {
+type GenericLoader struct {
+	Desc       string
 	Name       string
 	BodyFile   string
 	Types      []string
 	Dimensions []int
-	def        impl.Impl
 }
 
-// Load the generic representation from a file
-func (g *Generic) Load(filename string) error {
-	g.Name = ""
-	g.BodyFile = ""
-	g.Types = []string{}
-	g.Dimensions = []int{}
+// Generic represents a Fortran generic interface.
+type Generic struct {
+	Desc     string
+	Name     string
+	entities []interfaces.Entity
+}
 
+func NewFromFile(filename string) *Generic {
+	return Load(filename)
+}
+
+func New() *Generic {
+	return &Generic{}
+}
+
+// Load the generic representation from a json file.
+func Load(filename string) *Generic {
+	var gfile GenericLoader
 	// Load the json file
 	jsonData, err := ioutil.ReadFile(filename)
 	if err != nil {
 		fmt.Printf("Error opening file %s: %v\n", filename, err)
-		return err
+		return nil
 	}
 
-	err = json.Unmarshal(jsonData, g)
+	// Marshal the JSON data.
+	err = json.Unmarshal(jsonData, &gfile)
 	if err != nil {
 		fmt.Printf("Error reading json file %s: %v\n", filename, err)
-		return err
+		return nil
 	}
 
-	if len(g.Dimensions) == 0 {
-		g.Dimensions = append(g.Dimensions, 0)
+	if len(gfile.Dimensions) == 0 {
+		gfile.Dimensions = append(gfile.Dimensions, 0)
 	}
 
-	folder := filepath.Dir(filename)
-	// Set the properties for the definition
-	g.def.Basename = g.Name
-	g.def.LoadBody(path.Join(folder, g.BodyFile))
+	var g *Generic = new(Generic)
 
-	return nil
+	bodyfile := path.Join(filepath.Dir(filename), gfile.BodyFile)
+
+	// Set the properties of the Generic structure.
+	g.Desc = gfile.Desc
+	g.Name = gfile.Name
+	g.entities = make([]interfaces.Entity, 0, len(gfile.Types)*len(gfile.Dimensions))
+
+	for _, t := range gfile.Types {
+		for _, d := range gfile.Dimensions {
+			g.Add(impl.NewFromFile(g.Name, t, d, bodyfile))
+		}
+	}
+
+	return g
 }
 
 // Declaration returns the generic interface declaration defined by the structure
 func (g Generic) Declaration() string {
 
-	// Ensure that the name is set.
-	g.def.Basename = g.Name
+	var s []string
 
-	s := "interface " + g.Name + "\n"
-	for _, t := range g.Types {
-		for _, d := range g.Dimensions {
-			g.def.Typename = t
-			g.def.Dimension = d
-			s += "module procedure " + g.def.Name() + "\n"
-		}
+	if len(g.Desc) > 0 {
+		s = append(s, g.Desc)
 	}
+	s = append(s, "interface "+g.Name)
+	for _, e := range g.entities {
+		s = append(s, e.Declaration())
+	}
+	s = append(s, "end interface")
 
-	s += "end interface"
-	return s
+	return strings.Join(s, "\n")
 }
 
 // Definition returns the specific implementations of the generic interface
 func (g Generic) Definition() string {
 
 	s := "\n"
-	for _, t := range g.Types {
-		for _, d := range g.Dimensions {
-			g.def.Typename = t
-			g.def.Dimension = d
-			s += g.def.Definition() + "\n"
-		}
+	for _, e := range g.entities {
+		s += e.Definition() + "\n"
 	}
 
 	return s
+}
+
+// Add an entity to the generic interface.
+func (g *Generic) Add(e interfaces.Entity) {
+	g.entities = append(g.entities, e)
 }

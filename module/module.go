@@ -1,9 +1,16 @@
 package module
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"path"
+	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/elezar/gomodgen/generic"
+	"github.com/elezar/gomodgen/interfaces"
 )
 
 const (
@@ -13,15 +20,51 @@ const (
 
 type lines []string
 
-type Entity interface {
-	Declaration() string
-	Definition() string
-}
-
 type Module struct {
 	Desc     string
 	Name     string
-	Entities []Entity
+	entities []interfaces.Entity
+}
+
+type ModuleLoader struct {
+	Desc     string
+	Name     string
+	Generics []string
+}
+
+// Load the module representation from a json file.
+func Load(filename string) *Module {
+	var mfile ModuleLoader
+
+	// Load the json file
+	jsonData, err := ioutil.ReadFile(filename)
+	if err != nil {
+		fmt.Printf("Error opening file %s: %v\n", filename, err)
+		return nil
+	}
+
+	// Marshal the JSON data.
+
+	err = json.Unmarshal(jsonData, &mfile)
+	if err != nil {
+		fmt.Printf("Error reading json file %s: %v\n", filename, err)
+		return nil
+	}
+
+	// Set the properties of the Module structure
+	var m *Module = new(Module)
+	m.Desc = mfile.Desc
+	m.Name = mfile.Name
+
+	m.entities = make([]interfaces.Entity, 0, len(mfile.Generics))
+
+	usepath := filepath.Dir(filename)
+
+	for _, g := range mfile.Generics {
+		m.Add(generic.NewFromFile(path.Join(usepath, g)))
+	}
+
+	return m
 }
 
 // Generate generates the source for the module.
@@ -34,20 +77,21 @@ func (m Module) Generate() string {
 	mLines.Add(m.Description(), indent)
 	mLines.Add("module "+m.Name, indent)
 
-	indent++
+	// indent++
 	mLines.Add("implicit none", indent)
 	mLines.Add("private", indent)
 
 	// Add the declartion for the module.
 	mLines.Add(m.Declaration(), indent)
 
-	mLines.Add("contains", indent-1)
+	mLines.Add("contains", indent)
 
 	// Add the module body.
 	mLines.Add(m.Definition(), indent)
 
-	indent--
+	// indent--
 	mLines.Add("end module "+m.Name, indent)
+	mLines.Add("", 0)
 
 	s := strings.Join(mLines, "\n")
 
@@ -70,7 +114,7 @@ func (m Module) Declaration() string {
 
 	var s []string
 
-	for _, e := range m.Entities {
+	for _, e := range m.entities {
 		s = append(s, e.Declaration())
 	}
 
@@ -83,7 +127,7 @@ func (m Module) Definition() string {
 
 	var s []string
 
-	for _, e := range m.Entities {
+	for _, e := range m.entities {
 		s = append(s, e.Definition())
 	}
 
@@ -91,8 +135,8 @@ func (m Module) Definition() string {
 }
 
 // Add an entity to the module.
-func (m *Module) Add(e Entity) {
-	m.Entities = append(m.Entities, e)
+func (m *Module) Add(e interfaces.Entity) {
+	m.entities = append(m.entities, e)
 }
 
 // Add adds a newLine to a set of lines using the specified indent.

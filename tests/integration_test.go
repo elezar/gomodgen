@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"io/ioutil"
 	"testing"
 
@@ -35,22 +36,17 @@ func TestFooInteger(t *testing.T) {
 
 func TestFooGenericInterface(t *testing.T) {
 
-	var this generic.Generic
+	var this *generic.Generic
 
-	err := this.Load("test_generic_interface.in.json")
-	if err != nil {
-		panic(err)
+	this = generic.Load("test_generic_interface.in.json")
+	if this == nil {
+		panic(errors.New("Could not load generic"))
 	}
 
 	expected := generic.Generic{
-		Name:       "foo",
-		BodyFile:   "test_subroutine_body.in.f90",
-		Types:      []string{"integer"},
-		Dimensions: []int{0}}
+		Name: "foo",
+	}
 
 	assert.Equal(t, expected.Name, this.Name, "")
-	assert.Equal(t, expected.BodyFile, this.BodyFile, "")
-	assert.Equal(t, expected.Types, this.Types, "")
-	assert.Equal(t, expected.Dimensions, this.Dimensions, "")
 
 }

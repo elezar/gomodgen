@@ -1,0 +1,5 @@
+{
+  "Desc": "A collection of string utils.",
+  "Name": "string_utils",
+  "Generics": ["output.json"]
+}

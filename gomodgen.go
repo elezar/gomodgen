@@ -1,23 +1,22 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 
-	"github.com/elezar/gomodgen/generic"
+	"github.com/elezar/gomodgen/module"
 )
 
 func generate(outfile string, infile string) error {
-	var g generic.Generic
-	var err error
+	var m *module.Module
 
-	err = g.Load(infile)
-	if err != nil {
-		return err
+	m = module.Load(infile)
+	if m == nil {
+		return errors.New("Could not create module from " + infile)
 	}
 
-	fmt.Print(g.Declaration())
-	fmt.Print(g.Definition())
+	fmt.Print(m.Generate())
 	return nil
 }
 
