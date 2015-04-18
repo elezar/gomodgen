@@ -4,6 +4,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io/ioutil"
 
 	"github.com/elezar/gomodgen/module"
 )
@@ -16,7 +17,12 @@ func generate(outfile string, infile string) error {
 		return errors.New("Could not create module from " + infile)
 	}
 
-	fmt.Print(m.Generate())
+	if outfile != "" {
+		ioutil.WriteFile(outfile, []byte(m.Generate()), 0644)
+	} else {
+		fmt.Print(m.Generate())
+	}
+
 	return nil
 }
 

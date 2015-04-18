@@ -74,14 +74,15 @@ func Load(filename string) *Generic {
 	return g
 }
 
+func (g Generic) Description() string {
+	return g.Desc
+}
+
 // Declaration returns the generic interface declaration defined by the structure
 func (g Generic) Declaration() string {
 
 	var s []string
 
-	if len(g.Desc) > 0 {
-		s = append(s, g.Desc)
-	}
 	s = append(s, "interface "+g.Name)
 	for _, e := range g.entities {
 		s = append(s, e.Declaration())

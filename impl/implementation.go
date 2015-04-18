@@ -68,6 +68,10 @@ func (i *Impl) LoadBody(filename string) error {
 	return nil
 }
 
+func (i Impl) Description() string {
+	return ""
+}
+
 func (i Impl) Declaration() string {
 	return "module procedure " + i.Name()
 }

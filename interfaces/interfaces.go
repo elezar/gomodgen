@@ -3,6 +3,7 @@ package interfaces
 type Adder func(e Entity)
 
 type Entity interface {
+	Description() string
 	Declaration() string
 	Definition() string
 }

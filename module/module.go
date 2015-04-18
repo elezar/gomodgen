@@ -6,19 +6,13 @@ import (
 	"io/ioutil"
 	"path"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/elezar/gomodgen/generic"
 	"github.com/elezar/gomodgen/interfaces"
 )
 
-const (
-	commentTag = "! "
-	tab        = "  "
-)
-
-type lines []string
+var o Outputer
 
 type Module struct {
 	Desc     string
@@ -69,83 +63,67 @@ func Load(filename string) *Module {
 
 // Generate generates the source for the module.
 func (m Module) Generate() string {
-	var mLines lines
-
-	indent := 0
-
 	// Add the description as a line comment.
-	mLines.Add(m.Description(), indent)
-	mLines.Add("module "+m.Name, indent)
+	o.Add(m.Description())
+	o.Add("module " + m.Name)
 
 	// indent++
-	mLines.Add("implicit none", indent)
-	mLines.Add("private", indent)
+	o.Add("implicit none")
+	o.Add("private")
 
 	// Add the declartion for the module.
-	mLines.Add(m.Declaration(), indent)
+	o.Add(m.Declaration())
 
-	mLines.Add("contains", indent)
+	o.Add("contains")
 
 	// Add the module body.
-	mLines.Add(m.Definition(), indent)
+	o.Add(m.Definition())
 
 	// indent--
-	mLines.Add("end module "+m.Name, indent)
-	mLines.Add("", 0)
+	o.Add("end module " + m.Name)
+	o.Add("", 0)
 
-	s := strings.Join(mLines, "\n")
-
-	return s
+	return o.String()
 }
 
 // Description returns the text description for the module.
 func (m Module) Description() string {
-	var s lines
-	s.Add(commentTag+"Automatically generated on "+fmt.Sprint(time.Now()), 0)
-	s.Add("", 0)
-	s.Add(commentTag+m.Desc, 0)
+	var s Outputer
+	s.AddComment("Automatically generated on " + fmt.Sprint(time.Now()))
+	s.AddBlankLine()
+	s.AddComment(m.Desc)
 
-	return strings.Join(s, "\n")
+	return s.String()
 }
 
 // Declaration returns the declaration part of the module. This includes
 // Any generic interfaces.
 func (m Module) Declaration() string {
 
-	var s []string
+	var s Outputer
 
 	for _, e := range m.entities {
-		s = append(s, e.Declaration())
+		s.AddComment(e.Description())
+		s.Add(e.Declaration())
 	}
 
-	return strings.Join(s, "\n")
+	return s.String()
 }
 
 // Definition returns the defintion part (body) of the module. This includes
 // the bodies of any specific implementations of generic interfaces.
 func (m Module) Definition() string {
 
-	var s []string
+	var s Outputer
 
 	for _, e := range m.entities {
-		s = append(s, e.Definition())
+		s.Add(e.Definition())
 	}
 
-	return strings.Join(s, "\n")
+	return s.String()
 }
 
 // Add an entity to the module.
 func (m *Module) Add(e interfaces.Entity) {
 	m.entities = append(m.entities, e)
-}
-
-// Add adds a newLine to a set of lines using the specified indent.
-func (l *lines) Add(newLine string, indent int) {
-	var s string
-
-	for i := 0; i < indent; i++ {
-		s += tab
-	}
-
-	*l = append(*l, s+newLine)
 }
