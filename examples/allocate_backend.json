@@ -1,0 +1,5 @@
+{
+  "Desc": "Wrappers for allocation.",
+  "Name": "allocate_backend",
+  "Generics": ["allocate.json"]
+}

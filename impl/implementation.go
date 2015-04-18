@@ -1,8 +1,10 @@
 package impl
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
+	"strconv"
 	"strings"
 
 	"github.com/elezar/gomodgen/interfaces"
@@ -89,9 +91,29 @@ func (i Impl) Definition(o interfaces.Outputer) {
 
 	s := r.Replace(i.BodyTemplate)
 
+	output := ""
+
+	start := strings.Index(s, "{{")
+	for start > -1 {
+		end := strings.Index(s, "}}")
+
+		if end < 0 {
+			break
+		}
+		end += 2
+
+		macro := s[start:end]
+		replace := expand(macro)
+		output += s[:start] + replace
+
+		s = strings.Replace(s[end:], macro, replace, -1)
+		start = strings.Index(s, "{{")
+	}
+
+	output += s
 	o.AddLine()
 	i.Description(o)
-	o.Add(s)
+	o.Add(output)
 	o.Newline()
 }
 
@@ -129,4 +151,64 @@ func nd(dim int) string {
 		return n(dim) + "d"
 	}
 	return ""
+}
+
+func repeat(text string, delimiter string, times int) string {
+	var s []string
+
+	s = make([]string, 0, times)
+	for i := 0; i < times; i++ {
+		s = append(s, text)
+	}
+
+	return strings.Join(s, delimiter)
+}
+
+func forloop(text string, delimiter string, start, stop, step int) string {
+	var s []string
+	times := (stop - start) / step
+
+	// Ensure that there is a %d in the text.
+	if !strings.Contains(text, "%d") {
+		return repeat(text, delimiter, times)
+	}
+
+	s = make([]string, 0, times)
+
+	for i := start; i < stop; i += step {
+		s = append(s, fmt.Sprintf(text, i))
+	}
+
+	return strings.Join(s, delimiter)
+}
+
+func expand(macro string) string {
+	opened := strings.HasPrefix(macro, "{{")
+	closed := strings.HasSuffix(macro, "}}")
+
+	if !(opened && closed) {
+		return macro
+	}
+
+	parts := strings.Split(macro[2:len(macro)-2], ";")
+
+	op := parts[0]
+
+	switch op {
+	case "for":
+		start, _ := strconv.Atoi(parts[1])
+		stop, _ := strconv.Atoi(parts[2])
+		step, _ := strconv.Atoi(parts[3])
+		text := parts[4]
+		delimiter := ""
+		if len(parts) > 5 {
+			delimiter = parts[5]
+		}
+		macro = forloop(text, delimiter, start, stop, step)
+	default:
+		panic(errors.New("Undefined macro: " + macro))
+	}
+
+	macro = strings.Replace(macro, "\\n", "\n", -1)
+	return macro
 }

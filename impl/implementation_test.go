@@ -1,6 +1,7 @@
 package impl
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/elezar/gomodgen/interfaces"
@@ -142,4 +143,34 @@ func TestStripTypenames(t *testing.T) {
 	for _, c := range cases {
 		assert.Equal(t, c.want, stripTypename(c.in), "For: "+c.in)
 	}
+}
+
+func TestRepeat(t *testing.T) {
+	text := ":"
+	output := repeat(text, ",", 1)
+	assert.Equal(t, ":", output, "")
+}
+
+func TestLoop(t *testing.T) {
+	text := "d%d"
+	output := forloop(text, ", ", 1, 3, 1)
+	assert.Equal(t, "d1, d2", output, "")
+}
+
+func TestExpand(t *testing.T) {
+	in := "{{for;0;3;1;:;,}}"
+	output := expand(in)
+
+	assert.Equal(t, ":,:,:", output, "")
+
+}
+
+func TestExpandNewLine(t *testing.T) {
+	in := "{{for;0;3;1;:;\n}}"
+
+	fmt.Println(in)
+	output := expand(in)
+
+	assert.Equal(t, ":\n:\n:", output, "")
+
 }

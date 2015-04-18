@@ -1,0 +1,7 @@
+{
+  "Desc": "Allocate memory",
+  "Name": "allocate",
+  "BodyFile": "allocate.in.f90",
+  "Types": ["integer(4)", "real(4)", "complex(4)"],
+  "Dimensions": [1, 2, 3, 4]
+}
