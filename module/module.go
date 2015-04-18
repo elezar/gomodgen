@@ -12,8 +12,6 @@ import (
 	"github.com/elezar/gomodgen/interfaces"
 )
 
-var o Outputer
-
 type Module struct {
 	Desc     string
 	Name     string
@@ -63,64 +61,64 @@ func Load(filename string) *Module {
 
 // Generate generates the source for the module.
 func (m Module) Generate() string {
+
+	var o *Outputer = new(Outputer)
+
 	// Add the description as a line comment.
-	o.Add(m.Description())
+	m.Description(o)
 	o.Add("module " + m.Name)
 
-	// indent++
+	o.Indent()
 	o.Add("implicit none")
+	o.Newline()
 	o.Add("private")
+	o.Newline()
 
 	// Add the declartion for the module.
-	o.Add(m.Declaration())
+	m.Declaration(o)
 
+	// Contains
+	o.Newline()
+	o.Deindent()
 	o.Add("contains")
 
 	// Add the module body.
-	o.Add(m.Definition())
+	m.Definition(o)
 
-	// indent--
+	// End module
+	o.AddLine()
 	o.Add("end module " + m.Name)
-	o.Add("", 0)
+	o.Newline()
 
 	return o.String()
 }
 
 // Description returns the text description for the module.
-func (m Module) Description() string {
-	var s Outputer
-	s.AddComment("Automatically generated on " + fmt.Sprint(time.Now()))
-	s.AddBlankLine()
-	s.AddComment(m.Desc)
-
-	return s.String()
+func (m Module) Description(o *Outputer) {
+	o.AddComment("Automatically generated on " + fmt.Sprint(time.Now()))
+	o.Newline()
+	o.AddComment(m.Desc)
 }
 
 // Declaration returns the declaration part of the module. This includes
 // Any generic interfaces.
-func (m Module) Declaration() string {
-
-	var s Outputer
+func (m Module) Declaration(o *Outputer) {
 
 	for _, e := range m.entities {
-		s.AddComment(e.Description())
-		s.Add(e.Declaration())
+		e.Description(o)
+		e.Declaration(o)
 	}
 
-	return s.String()
 }
 
 // Definition returns the defintion part (body) of the module. This includes
 // the bodies of any specific implementations of generic interfaces.
-func (m Module) Definition() string {
-
-	var s Outputer
+func (m Module) Definition(o *Outputer) {
 
 	for _, e := range m.entities {
-		s.Add(e.Definition())
+		e.Definition(o)
 	}
 
-	return s.String()
 }
 
 // Add an entity to the module.

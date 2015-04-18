@@ -1,4 +1,5 @@
 {
+  "Desc": "A generic interface for the output subroutine",
   "Name": "output",
   "BodyFile": "output.in.f90",
   "Types": ["integer", "real(4)"],

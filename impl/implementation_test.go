@@ -3,10 +3,13 @@ package impl
 import (
 	"testing"
 
+	"github.com/elezar/gomodgen/interfaces"
+
 	"github.com/stretchr/testify/assert"
 )
 
 func TestTypeNameReplacement(t *testing.T) {
+
 	cases := []struct {
 		def  string
 		want string
@@ -19,19 +22,25 @@ func TestTypeNameReplacement(t *testing.T) {
 		{"preamble{{type}}", "preambleinteger"},
 	}
 	for _, c := range cases {
+
+		var o *interfaces.OutputTester = new(interfaces.OutputTester)
+
 		this := Impl{
 			BodyTemplate: c.def,
 			Typename:     "integer",
 		}
 
-		assert.Equal(t, c.want, this.Definition(), "")
+		this.Definition(o)
+		assert.Equal(t, c.want, o.String(), "")
 	}
 }
 
 func TestBasenameReplacement(t *testing.T) {
 	this := Impl{BodyTemplate: "{{basename}}", Basename: "foo"}
 
-	assert.Equal(t, "foo", this.Definition(), "")
+	var o *interfaces.OutputTester = new(interfaces.OutputTester)
+	this.Definition(o)
+	assert.Equal(t, "foo", o.String(), "")
 
 }
 
@@ -46,13 +55,17 @@ func TestNameReplacement(t *testing.T) {
 		{99, "foo_integer_99d"},
 	}
 	for _, c := range cases {
+
 		this := Impl{Basename: "foo",
 			BodyTemplate: "{{name}}",
 			Typename:     "integer",
 			Dimension:    c.d,
 		}
 
-		assert.Equal(t, c.want, this.Definition(), "")
+		var o *interfaces.OutputTester = new(interfaces.OutputTester)
+		this.Definition(o)
+
+		assert.Equal(t, c.want, o.String(), "")
 	}
 }
 
@@ -110,7 +123,9 @@ func TestNString(t *testing.T) {
 		this := Impl{BodyTemplate: "{{n}}",
 			Dimension: c.d}
 
-		assert.Equal(t, c.want, this.Definition(), "")
+		var o *interfaces.OutputTester = new(interfaces.OutputTester)
+		this.Definition(o)
+		assert.Equal(t, c.want, o.String(), "")
 	}
 
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/elezar/gomodgen/interfaces"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -22,6 +23,7 @@ type G int
 
 func (g G) Declaration() string { return "Declaration" }
 func (g G) Definition() string  { return "Definition" }
+func (g G) Description() string { return "Description" }
 
 func TestAddEntity(t *testing.T) {
 
@@ -30,7 +32,7 @@ func TestAddEntity(t *testing.T) {
 		Name: "string_utils",
 	}
 
-	var g G
+	var g interfaces.EntityTester
 
 	m.Add(g)
 

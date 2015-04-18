@@ -3,10 +3,12 @@ package main
 import (
 	"errors"
 	"io/ioutil"
+	"strings"
 	"testing"
 
 	"github.com/elezar/gomodgen/generic"
 	"github.com/elezar/gomodgen/impl"
+	"github.com/elezar/gomodgen/interfaces"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -26,7 +28,9 @@ func TestFooInteger(t *testing.T) {
 		t.Error(err)
 	}
 
-	assert.Equal(t, string(datOut), this.Definition(), "")
+	var o *interfaces.OutputTester = new(interfaces.OutputTester)
+	this.Definition(o)
+	assert.Equal(t, strings.TrimSpace(string(datOut)), o.String(), "")
 
 	// One can write out the file to disk so that the expected and actual results can be
 	// properly compared.

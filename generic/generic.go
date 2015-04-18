@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"path"
 	"path/filepath"
-	"strings"
 
 	"github.com/elezar/gomodgen/impl"
 	"github.com/elezar/gomodgen/interfaces"
@@ -74,33 +73,30 @@ func Load(filename string) *Generic {
 	return g
 }
 
-func (g Generic) Description() string {
-	return g.Desc
+func (g Generic) Description(o interfaces.Outputer) {
+	o.AddComment(g.Desc)
 }
 
 // Declaration returns the generic interface declaration defined by the structure
-func (g Generic) Declaration() string {
+func (g Generic) Declaration(o interfaces.Outputer) {
 
-	var s []string
-
-	s = append(s, "interface "+g.Name)
+	o.Add("interface " + g.Name)
+	o.Indent()
 	for _, e := range g.entities {
-		s = append(s, e.Declaration())
+		e.Declaration(o)
 	}
-	s = append(s, "end interface")
+	o.Deindent()
+	o.Add("end interface")
 
-	return strings.Join(s, "\n")
 }
 
 // Definition returns the specific implementations of the generic interface
-func (g Generic) Definition() string {
+func (g Generic) Definition(o interfaces.Outputer) {
 
-	s := "\n"
+	o.Add("")
 	for _, e := range g.entities {
-		s += e.Definition() + "\n"
+		e.Definition(o)
 	}
-
-	return s
 }
 
 // Add an entity to the generic interface.

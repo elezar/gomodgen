@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"strings"
+
+	"github.com/elezar/gomodgen/interfaces"
 )
 
 // Constants representing the tags in the implementation body.
@@ -63,27 +65,34 @@ func (i *Impl) LoadBody(filename string) error {
 		return err
 	}
 
-	i.BodyTemplate = string(dataIn)
+	i.BodyTemplate = strings.TrimSpace(string(dataIn))
 
 	return nil
 }
 
-func (i Impl) Description() string {
-	return ""
+func (i Impl) Description(o interfaces.Outputer) {
+	r := i.newReplacer()
+	var s string
+	s = "{{name}} implements {{basename}} for a {{n}}-d {{type}} parameter"
+
+	o.AddComment(r.Replace(s))
 }
 
-func (i Impl) Declaration() string {
-	return "module procedure " + i.Name()
+func (i Impl) Declaration(o interfaces.Outputer) {
+	o.Add("module procedure " + i.Name())
 }
 
 // Definition produces the string representation of the implemention, making the required
 // replacements.
-func (i Impl) Definition() string {
+func (i Impl) Definition(o interfaces.Outputer) {
 	r := i.newReplacer()
 
 	s := r.Replace(i.BodyTemplate)
 
-	return s
+	o.AddLine()
+	i.Description(o)
+	o.Add(s)
+	o.Newline()
 }
 
 // Name returns the expanded name of the Impl instance. This takes the type name and

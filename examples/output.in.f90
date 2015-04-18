@@ -1,12 +1,10 @@
-!=========================================================================================
-! {{name}} implements {{basename}} for a {{n}}-d {{type}} parameter
 ! Paramters:
 !   i The {{type}} value to output
 
   subroutine {{name}}(i)
     implicit none
 
-! Paramters
+! Parameters
     {{type}}, value :: i
 
     write (*,*) 'i=', i
