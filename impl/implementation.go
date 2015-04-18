@@ -93,8 +93,7 @@ func (i Impl) Definition(o interfaces.Outputer) {
 
 	output := ""
 
-	start := strings.Index(s, "{{")
-	for start > -1 {
+	for start := strings.Index(s, "{{"); start > -1; start = strings.Index(s, "{{") {
 		end := strings.Index(s, "}}")
 
 		if end < 0 {
@@ -107,7 +106,7 @@ func (i Impl) Definition(o interfaces.Outputer) {
 		output += s[:start] + replace
 
 		s = strings.Replace(s[end:], macro, replace, -1)
-		start = strings.Index(s, "{{")
+
 	}
 
 	output += s
