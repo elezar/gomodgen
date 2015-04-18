@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestFoo(t *testing.T) {
+func TestBasic(t *testing.T) {
 	this := Generic{
 		Name:       "foo",
 		Types:      []string{"integer"},

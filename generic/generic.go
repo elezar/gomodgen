@@ -67,7 +67,9 @@ func (g Generic) Declaration() string {
 	s := "interface " + g.Name + "\n"
 	for _, t := range g.Types {
 		for _, d := range g.Dimensions {
-			s += "module procedure " + g.def.Name(t, d) + "\n"
+			g.def.Typename = t
+			g.def.Dimension = d
+			s += "module procedure " + g.def.Name() + "\n"
 		}
 	}
 
@@ -81,7 +83,9 @@ func (g Generic) Definition() string {
 	s := "\n"
 	for _, t := range g.Types {
 		for _, d := range g.Dimensions {
-			s += g.def.Definition(t, d) + "\n"
+			g.def.Typename = t
+			g.def.Dimension = d
+			s += g.def.Definition() + "\n"
 		}
 	}
 

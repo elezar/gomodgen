@@ -16,11 +16,11 @@ const (
 
 // The replacer is used to replace the occurrences of the tags in the implementation
 // representation.
-func (i Impl) newReplacer(typename string, dim int) *strings.Replacer {
+func (i Impl) newReplacer() *strings.Replacer {
 	r := strings.NewReplacer(
-		typetag, typename,
-		nametag, i.Name(typename, dim),
-		ntag, n(dim),
+		typetag, i.Typename,
+		nametag, i.Name(),
+		ntag, n(i.Dimension),
 		basetag, i.Basename)
 	return r
 }
@@ -32,6 +32,24 @@ func (i Impl) newReplacer(typename string, dim int) *strings.Replacer {
 type Impl struct {
 	Basename     string
 	BodyTemplate string
+	Typename     string
+	Dimension    int
+}
+
+func New(basename string, bodyTemplate string, typename string, dim int) *Impl {
+	return &Impl{Basename: basename,
+		BodyTemplate: bodyTemplate,
+		Typename:     typename,
+		Dimension:    dim,
+	}
+}
+
+// Create a new implementation, loading the body from a file.
+func NewImplFromFile(Basename string, typename string, dim int, filename string) *Impl {
+	i := New(Basename, "", typename, dim)
+
+	i.LoadBody(filename)
+	return i
 }
 
 // LoadBody loads the body of an Impl from the file specified
@@ -52,8 +70,8 @@ func (i *Impl) LoadBody(filename string) error {
 
 // Definition produces the string representation of the implemention, making the required
 // replacements.
-func (i Impl) Definition(typename string, dim int) string {
-	r := i.newReplacer(typename, dim)
+func (i Impl) Definition() string {
+	r := i.newReplacer()
 
 	s := r.Replace(i.BodyTemplate)
 
@@ -62,12 +80,12 @@ func (i Impl) Definition(typename string, dim int) string {
 
 // Name returns the expanded name of the Impl instance. This takes the type name and
 // dimensionality into account.
-func (i Impl) Name(typename string, dim int) string {
+func (i Impl) Name() string {
 
-	s := i.Basename + "_" + stripTypename(typename)
+	s := i.Basename + "_" + stripTypename(i.Typename)
 
-	if dim != 0 {
-		s += "_" + nd(dim)
+	if i.Dimension != 0 {
+		s += "_" + nd(i.Dimension)
 	}
 
 	return s

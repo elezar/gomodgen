@@ -11,7 +11,10 @@ import (
 
 func TestFooInteger(t *testing.T) {
 
-	this := impl.Impl{Basename: "foo"}
+	this := impl.Impl{
+		Basename: "foo",
+		Typename: "integer",
+	}
 	err := this.LoadBody("test_subroutine_body.in.f90")
 	if err != nil {
 		t.Error(err)
@@ -22,7 +25,7 @@ func TestFooInteger(t *testing.T) {
 		t.Error(err)
 	}
 
-	assert.Equal(t, string(datOut), this.Definition("integer", 0), "")
+	assert.Equal(t, string(datOut), this.Definition(), "")
 
 	// One can write out the file to disk so that the expected and actual results can be
 	// properly compared.
