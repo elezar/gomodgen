@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"path"
+	"path/filepath"
 
 	"github.com/elezar/gomodgen/impl"
 )
@@ -48,9 +50,10 @@ func (g *Generic) Load(filename string) error {
 		g.Dimensions = append(g.Dimensions, 0)
 	}
 
+	folder := filepath.Dir(filename)
 	// Set the properties for the definition
 	g.def.Basename = g.Name
-	g.def.LoadBody(g.BodyFile)
+	g.def.LoadBody(path.Join(folder, g.BodyFile))
 
 	return nil
 }

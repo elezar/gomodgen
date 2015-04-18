@@ -1,0 +1,6 @@
+{
+  "Name": "output",
+  "BodyFile": "output.in.f90",
+  "Types": ["integer", "real(4)"],
+  "Dimensions": [0]
+}

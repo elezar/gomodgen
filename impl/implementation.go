@@ -64,13 +64,24 @@ func (i Impl) Definition(typename string, dim int) string {
 // dimensionality into account.
 func (i Impl) Name(typename string, dim int) string {
 
-	s := i.Basename + "_" + typename
+	s := i.Basename + "_" + stripTypename(typename)
 
 	if dim != 0 {
 		s += "_" + nd(dim)
 	}
 
 	return s
+}
+
+// Strip unwanted characters (e.g. '(', ')') from the typename.
+func stripTypename(typename string) string {
+	r := strings.NewReplacer(
+		"(", "",
+		")", "",
+	)
+
+	t := r.Replace(typename)
+	return t
 }
 
 // n returns the string representation of the

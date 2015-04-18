@@ -103,3 +103,17 @@ func TestNString(t *testing.T) {
 	}
 
 }
+
+func TestStripTypenames(t *testing.T) {
+	cases := []struct {
+		in   string
+		want string
+	}{
+		{"integer", "integer"},
+		{"real(4)", "real4"},
+	}
+
+	for _, c := range cases {
+		assert.Equal(t, c.want, stripTypename(c.in), "For: "+c.in)
+	}
+}
